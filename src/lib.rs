@@ -46,7 +46,10 @@ where
 
     try_stream! {
         while let Some(stream) = incoming.try_next().await? {
-            let tls = tokio_openssl::accept(&acceptor, stream).await?;
+            let tls = match tokio_openssl::accept(&acceptor, stream).await {
+                Err(e) => continue,
+                Ok(tls) => tls,
+            };
 
             let ssl = SslStream {
                 inner: tls
